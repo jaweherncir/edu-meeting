@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Liste des Élèves</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/fontawesome.css" />
+  <link rel="stylesheet" href="assets/css/templatemo-edu-meeting.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" />
+  <style>
+    header.header-area {
+      background-color: black;
+    }
+    .icon-btn {
+      font-size: 14px;
+      padding: 5px;
+      margin: 3px;
+    }
+    table {
+      font-size: 12px;
+      width: 100%;
+    }
+    table th, table td {
+      text-align: center;
+      padding: 8px;
+    }
+    .payee-oui {
+      color: green;
+      font-weight: bold;
+    }
+    .payee-non {
+      color: red;
+      font-weight: bold;
+    }
+    .action-icons {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+  </style>
+
+  <!-- Librairie QRCode.js -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- jsPDF AutoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<header class="header-area header-sticky">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <nav class="main-nav">
+          <a href="index.html" class="logo">Edu </a>
+          <ul class="nav">
+            <li class="scroll-to-section"><a href="#top" class="active">Accueil</a></li>
+            <li class="scroll-to-section"><a href="#courses">Espace Parent</a></li>
+            <li class="scroll-to-section"><a href="#historique">Historique</a></li>
+            <li><a href="#">Déconnecter</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section style="margin-top: 100px;">
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">Liste des Élèves Inscrits</h2>
+    <button id="addNewBtn" class="btn btn-primary mb-3">Nouvel Élève</button>
+    <table id="example" class="display table table-striped">
+      <thead>
+        <tr>
+          <th>Matricule</th>
+          <th>Nom</th>
+          <th>Prénom</th>
+          <th>Classe</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Adresse</th>
+          <th>Payée</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Modal Ajouter Élève -->
+<div class="modal fade" id="addEleveModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="addEleveForm">
+        <div class="modal-header">
+          <h5 class="modal-title">Ajouter un Élève</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body row g-3 px-3">
+          <div class="col-md-6">
+            <input type="text" name="matricule" class="form-control" placeholder="Matricule" required />
+            <input type="text" name="nom" class="form-control" placeholder="Nom" required />
+            <input type="text" name="prenom" class="form-control" placeholder="Prénom" required />
+            <select name="classe" class="form-control" required>
+              <option>7ème</option><option>8ème</option><option>9ème</option>
+              <option>1er</option><option>2éme</option><option>3éme</option><option>bac</option>
+            </select>
+            <select name="sexe" class="form-control" required>
+              <option>Masculin</option><option>Féminin</option>
+            </select>
+            <input type="date" name="dateNaissance" class="form-control" required />
+            <input type="text" name="lieuNaissance" class="form-control" placeholder="Lieu de Naissance" required />
+          </div>
+          <div class="col-md-6">
+            <input type="text" name="adresse" class="form-control" placeholder="Adresse" required />
+            <input type="text" name="telephone" class="form-control" placeholder="Téléphone" required />
+            <input type="email" name="email" class="form-control" placeholder="Email" required />
+            <input type="text" name="nompere" class="form-control" placeholder="Nom du Père" required />
+            <input type="text" name="nomMere" class="form-control" placeholder="Nom de la Mère" required />
+            <select name="typePaiement" class="form-control" required>
+              <option value="mois">Mois</option>
+              <option value="semestre">Semestre</option>
+              <option value="année">Année</option>
+            </select>
+            <input type="date" name="dateDebutPaiement" class="form-control" required />
+            <input type="date" name="dateFinPaiement" class="form-control" required />
+            <input type="number" name="montantPaiement" class="form-control" placeholder="Montant Paiement (DT)" min="0" step="0.01" required />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Ajouter</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Modifier Élève -->
+<div class="modal fade" id="editEleveModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="editEleveForm">
+        <input type="hidden" name="_id" id="editEleveId">
+        <div class="modal-header">
+          <h5 class="modal-title">Modifier un Élève</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body row g-3 px-3">
+          <div class="col-md-6">
+            <input type="text" name="matricule" id="editMatricule" class="form-control" required />
+            <input type="text" name="nom" id="editNom" class="form-control" required />
+            <input type="text" name="prenom" id="editPrenom" class="form-control" required />
+            <select name="classe" id="editClasse" class="form-control" required>
+              <option>7ème</option><option>8ème</option><option>9ème</option>
+              <option>1er</option><option>2éme</option><option>3éme</option><option>bac</option>
+            </select>
+            <select name="sexe" id="editSexe" class="form-control" required>
+              <option>Masculin</option><option>Féminin</option>
+            </select>
+            <input type="date" name="dateNaissance" id="editDateNaissance" class="form-control" required />
+            <input type="text" name="lieuNaissance" id="editLieuNaissance" class="form-control" required />
+          </div>
+          <div class="col-md-6">
+            <input type="text" name="adresse" id="editAdresse" class="form-control" required />
+            <input type="text" name="telephone" id="editTelephone" class="form-control" required />
+            <input type="email" name="email" id="editEmail" class="form-control" required />
+            <input type="text" name="nompere" id="editNompere" class="form-control" required />
+            <input type="text" name="nomMere" id="editNomMere" class="form-control" required />
+            <select name="typePaiement" id="editTypePaiement" class="form-control" required>
+              <option value="mois">Mois</option>
+              <option value="semestre">Semestre</option>
+              <option value="année">Année</option>
+            </select>
+            <input type="date" name="dateDebutPaiement" id="editDateDebut" class="form-control" required />
+            <input type="date" name="dateFinPaiement" id="editDateFin" class="form-control" required />
+            <input type="number" name="montantPaiement" id="editMontantPaiement" class="form-control" placeholder="Montant Paiement (DT)" min="0" step="0.01" required />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-warning">Modifier</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal QR Code -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content text-center">
+      <div class="modal-header">
+        <h5 class="modal-title">QR Code Élève</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p id="qrStudentName" class="fw-bold mb-2"></p>
+        <div id="qrcodeCanvas"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="text-center mt-5 mb-3">
+  <div class="container">
+    <p>&copy; Consulter les reçus des paiements</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+
+<script>
+$(document).ready(function () {
+  const table = $('#example').DataTable();
+
+  function loadEleves() {
+    fetch('http://localhost:5000/api/eleves')
+      .then(res => res.json())
+      .then(data => {
+        table.clear();
+        data.forEach(eleve => {
+          table.row.add([
+            eleve.matricule,
+            eleve.nom,
+            eleve.prenom,
+            eleve.classe,
+            eleve.email,
+            eleve.telephone,
+            eleve.adresse,
+            `<span class="${eleve.payee ? 'payee-oui' : 'payee-non'}">${eleve.payee ? 'Oui' : 'Non'}</span>`,
+            `<div class="action-icons">
+              <button class="btn btn-info icon-btn qr-btn" data-id="${eleve._id}" title="Voir QR Code">
+                <i class="fas fa-qrcode"></i>
+              </button>
+              <button class="btn btn-warning icon-btn edit-btn" data-id="${eleve._id}" title="Modifier">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-danger icon-btn delete-btn" data-id="${eleve._id}" title="Supprimer">
+                <i class="fas fa-trash"></i>
+              </button>
+              <button class="btn btn-secondary icon-btn export-pdf-btn" data-id="${eleve._id}" title="Exporter en PDF">
+                <i class="fas fa-file-pdf"></i>
+              </button>
+            </div>`
+          ]);
+        });
+        table.draw();
+      });
+  }
+
+  loadEleves();
+
+  $('#addNewBtn').click(() => new bootstrap.Modal(document.getElementById('addEleveModal')).show());
+
+  $('#addEleveForm').submit(function (e) {
+    e.preventDefault();
+    const formData = {};
+    $(this).serializeArray().forEach(({ name, value }) => formData[name] = value);
+    formData.montantPaiement = parseFloat(formData.montantPaiement);
+    formData.payee = true;
+    formData.inscrit = true;
+
+    fetch('http://localhost:5000/api/eleves', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.eleve) {
+        bootstrap.Modal.getInstance(document.getElementById('addEleveModal')).hide();
+        loadEleves();
+        this.reset();
+        alert("Élève ajouté !");
+      }
+    });
+  });
+
+  // Supprimer élève
+  $(document).on('click', '.delete-btn', function () {
+    const id = $(this).data('id');
+    if (confirm("Confirmer la suppression ?")) {
+      fetch(`http://localhost:5000/api/eleves/${id}`, { method: 'DELETE' })
+        .then(() => {
+          alert("Élève supprimé !");
+          loadEleves();
+        });
+    }
+  });
+
+  // Éditer élève
+  $(document).on('click', '.edit-btn', function () {
+    const id = $(this).data('id');
+    fetch(`http://localhost:5000/api/eleves/${id}`)
+      .then(res => res.json())
+      .then(eleve => {
+        $('#editEleveId').val(eleve._id);
+        $('#editMatricule').val(eleve.matricule);
+        $('#editNom').val(eleve.nom);
+        $('#editPrenom').val(eleve.prenom);
+        $('#editClasse').val(eleve.classe);
+        $('#editSexe').val(eleve.sexe);
+        $('#editDateNaissance').val(eleve.dateNaissance?.substring(0, 10));
+        $('#editLieuNaissance').val(eleve.lieuNaissance);
+        $('#editAdresse').val(eleve.adresse);
+        $('#editTelephone').val(eleve.telephone);
+        $('#editEmail').val(eleve.email);
+        $('#editNompere').val(eleve.nompere);
+        $('#editNomMere').val(eleve.nomMere);
+        $('#editTypePaiement').val(eleve.typePaiement);
+        $('#editDateDebut').val(eleve.dateDebutPaiement?.substring(0, 10));
+        $('#editDateFin').val(eleve.dateFinPaiement?.substring(0, 10));
+        $('#editMontantPaiement').val(eleve.montantPaiement);
+
+        new bootstrap.Modal(document.getElementById('editEleveModal')).show();
+      });
+  });
+
+  $('#editEleveForm').submit(function (e) {
+    e.preventDefault();
+    const id = $('#editEleveId').val();
+    const formData = {};
+    $(this).serializeArray().forEach(({ name, value }) => formData[name] = value);
+    formData.montantPaiement = parseFloat(formData.montantPaiement);
+
+    fetch(`http://localhost:5000/api/eleves/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    })
+    .then(res => res.json())
+    .then(() => {
+      bootstrap.Modal.getInstance(document.getElementById('editEleveModal')).hide();
+      loadEleves();
+      alert("Élève mis à jour !");
+    });
+  });
+
+  // Générer et afficher QR Code dans modal avec toutes les infos
+  $(document).on('click', '.qr-btn', function () {
+    const id = $(this).data('id');
+
+    fetch(`http://localhost:5000/api/eleves/${id}`)
+      .then(res => res.json())
+      .then(eleve => {
+        const qrData = `
+Matricule: ${eleve.matricule}
+Nom: ${eleve.nom}
+Prénom: ${eleve.prenom}
+Classe: ${eleve.classe}
+Sexe: ${eleve.sexe}
+Date Naissance: ${eleve.dateNaissance ? eleve.dateNaissance.substring(0, 10) : ''}
+Lieu Naissance: ${eleve.lieuNaissance}
+Adresse: ${eleve.adresse}
+Téléphone: ${eleve.telephone}
+Email: ${eleve.email}
+Nom Père: ${eleve.nompere}
+Nom Mère: ${eleve.nomMere}
+Type Paiement: ${eleve.typePaiement}
+Date Début Paiement: ${eleve.dateDebutPaiement ? eleve.dateDebutPaiement.substring(0, 10) : ''}
+Date Fin Paiement: ${eleve.dateFinPaiement ? eleve.dateFinPaiement.substring(0, 10) : ''}
+Montant Paiement: ${eleve.montantPaiement} DT
+Payée: ${eleve.payee ? 'Oui' : 'Non'}
+Inscrit: ${eleve.inscrit ? 'Oui' : 'Non'}
+        `.trim();
+
+        $('#qrStudentName').text(`${eleve.nom} ${eleve.prenom}`);
+
+        // Vider canvas précédent
+        $('#qrcodeCanvas').empty();
+
+        QRCode.toCanvas(qrData, { errorCorrectionLevel: 'H' }, function (err, canvas) {
+          if (err) {
+            alert("Erreur génération QR Code");
+            return console.error(err);
+          }
+          $('#qrcodeCanvas').append(canvas);
+          new bootstrap.Modal(document.getElementById('qrCodeModal')).show();
+        });
+      });
+  });
+
+  // Export PDF
+  $(document).on('click', '.export-pdf-btn', async function () {
+    const id = $(this).data('id');
+    try {
+      const res = await fetch(`http://localhost:5000/api/eleves/${id}`);
+      if (!res.ok) throw new Error('Erreur lors de la récupération des données de l\'élève');
+      const eleve = await res.json();
+
+      // Générer QR code sur canvas
+      const qrCanvas = document.createElement('canvas');
+      const qrText = `
+Matricule: ${eleve.matricule}
+Nom: ${eleve.nom}
+Prénom: ${eleve.prenom}
+Classe: ${eleve.classe}
+Sexe: ${eleve.sexe}
+Date Naissance: ${eleve.dateNaissance ? eleve.dateNaissance.substring(0, 10) : ''}
+Lieu Naissance: ${eleve.lieuNaissance}
+Adresse: ${eleve.adresse}
+Téléphone: ${eleve.telephone}
+Email: ${eleve.email}
+Nom Père: ${eleve.nompere}
+Nom Mère: ${eleve.nomMere}
+Type Paiement: ${eleve.typePaiement}
+Date Début Paiement: ${eleve.dateDebutPaiement ? eleve.dateDebutPaiement.substring(0, 10) : ''}
+Date Fin Paiement: ${eleve.dateFinPaiement ? eleve.dateFinPaiement.substring(0, 10) : ''}
+Montant Paiement: ${eleve.montantPaiement} DT
+Payée: ${eleve.payee ? 'Oui' : 'Non'}
+Inscrit: ${eleve.inscrit ? 'Oui' : 'Non'}
+      `.trim();
+
+      await QRCode.toCanvas(qrCanvas, qrText);
+      const qrImgData = qrCanvas.toDataURL('image/png');
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+
+      // Chargement du logo en base64 (exemple : logo du blason tunisien)
+      async function loadImageToBase64(url) {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Erreur chargement logo');
+        const blob = await response.blob();
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      }
+      const logoURL = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSs7M3B_Hgj_m2CsdB8ZV8zjX7RPDS3HSOhtA&s';
+      const logoBase64 = await loadImageToBase64(logoURL);
+
+      // Ajout logo + titre
+      doc.addImage(logoBase64, 'PNG', 10, 10, 25, 25);
+      doc.setFontSize(16);
+      doc.text('Lycée Privé - Reçu de Paiement Élève', pageWidth / 2, 20, { align: 'center' });
+
+      // Date export
+      const dateExport = new Date().toLocaleDateString();
+      doc.setFontSize(10);
+      doc.text(`Date d'export : ${dateExport}`, pageWidth - 10, 18, { align: 'right' });
+
+      doc.setFontSize(12);
+      doc.text(`Matricule : ${eleve.matricule}`, 10, 40);
+      doc.setLineWidth(0.5);
+      doc.line(10, 45, pageWidth - 10, 45);
+
+      // Tableau infos
+      const data = [
+        ['Nom', eleve.nom],
+        ['Prénom', eleve.prenom],
+        ['Classe', eleve.classe],
+        ['Sexe', eleve.sexe],
+        ['Date Naissance', eleve.dateNaissance ? eleve.dateNaissance.substring(0, 10) : ''],
+        ['Lieu Naissance', eleve.lieuNaissance],
+        ['Adresse', eleve.adresse],
+        ['Téléphone', eleve.telephone],
+        ['Email', eleve.email],
+        ['Nom Père', eleve.nompere],
+        ['Nom Mère', eleve.nomMere],
+        ['Type Paiement', eleve.typePaiement],
+        ['Date Début Paiement', eleve.dateDebutPaiement ? eleve.dateDebutPaiement.substring(0, 10) : ''],
+        ['Date Fin Paiement', eleve.dateFinPaiement ? eleve.dateFinPaiement.substring(0, 10) : ''],
+        ['Montant Paiement', `${eleve.montantPaiement} DT`],
+        ['Payée', eleve.payee ? 'Oui' : 'Non'],
+        ['Inscrit', eleve.inscrit ? 'Oui' : 'Non']
+      ];
+
+      doc.autoTable({
+        startY: 50,
+        head: [['Champ', 'Valeur']],
+        body: data,
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+        theme: 'grid',
+        margin: { left: 10, right: 10 }
+      });
+
+      const finalY = doc.lastAutoTable.finalY + 5;
+      doc.line(10, finalY, pageWidth - 10, finalY);
+
+      // QR code dans le pied
+      const qrSize = 50;
+      const footerY = finalY + 10;
+      doc.addImage(qrImgData, 'PNG', 10, footerY, qrSize, qrSize);
+
+      // Zone signature
+      doc.setDrawColor(0);
+      doc.rect(pageWidth - 70, footerY, 60, 30);
+      doc.text('Signature', pageWidth - 40, footerY + 20, { align: 'center' });
+
+      // Tampon lycée
+      doc.setFontSize(10);
+      doc.text('Tampon Lycée', pageWidth - 70, footerY + 50);
+
+      doc.save(`Recu_Paiement_${eleve.matricule}.pdf`);
+    } catch (error) {
+      console.error('Erreur export PDF:', error);
+      alert('Erreur lors de l\'export PDF : ' + error.message);
+    }
+  });
+
+});
+</script>
+</body>
+</html>
