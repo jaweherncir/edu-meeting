@@ -50,23 +50,28 @@
 </head>
 <body>
 
-<header class="header-area header-sticky">
-  <div class="container">
-    <div class="row">
-      <div class="col-12">
-        <nav class="main-nav">
-          <a href="index.html" class="logo">Edu </a>
-          <ul class="nav">
-            <li class="scroll-to-section"><a href="#top" class="active">Accueil</a></li>
-            <li class="scroll-to-section"><a href="#courses">Espace Parent</a></li>
-            <li class="scroll-to-section"><a href="#historique">Historique</a></li>
-            <li><a href="#">Déconnecter</a></li>
-          </ul>
-        </nav>
+  <header class="header-area header-sticky">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <nav class="main-nav">
+            <a href="index.html" class="logo d-flex align-items-center gap-2">
+              <img src="img/logolycee.png" alt="Logo" style="height: 45px" />
+              <span>Collège&Lycée</span>
+            </a>
+            <ul class="nav">
+              <li><a href="index.html" class="active">Accueil</a></li>
+              <li><a href="parent.html">Espace Parent</a></li>
+              <li><a href="eleve.html">Espace Élève</a></li>
+              <li><a href="historique.html">Historique</a></li>
+              <li><a href="prixTotal.html">Prix Total</a></li>
+              <li><a href="#">Déconnecter</a></li>
+            </ul>
+          </nav>
+        </div>
       </div>
     </div>
-  </div>
-</header>
+  </header>
 
 <section style="margin-top: 100px;">
   <div class="container mt-5">
@@ -222,41 +227,74 @@
 <script>
 $(document).ready(function () {
   const table = $('#example').DataTable();
+function loadEleves() {
+  fetch('http://localhost:5000/api/eleves')
+    .then(res => res.json())
+    .then(data => {
+      table.clear();
+      const today = new Date().toISOString().substring(0, 10); // date actuelle YYYY-MM-DD
 
-  function loadEleves() {
-    fetch('http://localhost:5000/api/eleves')
-      .then(res => res.json())
-      .then(data => {
-        table.clear();
-        data.forEach(eleve => {
-          table.row.add([
-            eleve.matricule,
-            eleve.nom,
-            eleve.prenom,
-            eleve.classe,
-            eleve.email,
-            eleve.telephone,
-            eleve.adresse,
-            `<span class="${eleve.payee ? 'payee-oui' : 'payee-non'}">${eleve.payee ? 'Oui' : 'Non'}</span>`,
-            `<div class="action-icons">
-              <button class="btn btn-info icon-btn qr-btn" data-id="${eleve._id}" title="Voir QR Code">
-                <i class="fas fa-qrcode"></i>
-              </button>
+      data.forEach(eleve => {
+        // Colonne "Payée"
+        const payeeCol = eleve.payee
+          ? `<span class="payee-oui">Oui</span>`
+          : `<span class="payee-non">Non</span>`;
+
+        // Date fin paiement formatée (YYYY-MM-DD)
+        const dateFin = eleve.dateFinPaiement ? eleve.dateFinPaiement.substring(0, 10) : null;
+
+        // Si dateFinPaiement égale à aujourd'hui => afficher uniquement bouton modifier
+        let actionsCol = '';
+        if (dateFin === today) {
+          actionsCol = `
+            <div class="action-icons">
               <button class="btn btn-warning icon-btn edit-btn" data-id="${eleve._id}" title="Modifier">
                 <i class="fas fa-edit"></i>
               </button>
-              <button class="btn btn-danger icon-btn delete-btn" data-id="${eleve._id}" title="Supprimer">
-                <i class="fas fa-trash"></i>
-              </button>
-              <button class="btn btn-secondary icon-btn export-pdf-btn" data-id="${eleve._id}" title="Exporter en PDF">
-                <i class="fas fa-file-pdf"></i>
-              </button>
-            </div>`
-          ]);
-        });
-        table.draw();
+            </div>`;
+        } else {
+          // Sinon afficher actions selon payee
+          if (eleve.payee) {
+            actionsCol = `
+              <div class="action-icons">
+                <button class="btn btn-info icon-btn qr-btn" data-id="${eleve._id}" title="Voir QR Code">
+                  <i class="fas fa-qrcode"></i>
+                </button>
+                <button class="btn btn-warning icon-btn edit-btn" data-id="${eleve._id}" title="Modifier">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-danger icon-btn delete-btn" data-id="${eleve._id}" title="Supprimer">
+                  <i class="fas fa-trash"></i>
+                </button>
+                <button class="btn btn-secondary icon-btn export-pdf-btn" data-id="${eleve._id}" title="Exporter en PDF">
+                  <i class="fas fa-file-pdf"></i>
+                </button>
+              </div>`;
+          } else {
+            actionsCol = `
+              <div class="action-icons">
+                <button class="btn btn-sm btn-success mark-paid-btn" data-id="${eleve._id}" title="Marquer comme payé">
+                  <i class="fas fa-check"></i>
+                </button>
+              </div>`;
+          }
+        }
+
+        table.row.add([
+          eleve.matricule,
+          eleve.nom,
+          eleve.prenom,
+          eleve.classe,
+          eleve.email,
+          eleve.telephone,
+          eleve.adresse,
+          payeeCol,
+          actionsCol
+        ]);
       });
-  }
+      table.draw();
+    });
+}
 
   loadEleves();
 
@@ -310,7 +348,7 @@ $(document).ready(function () {
         $('#editPrenom').val(eleve.prenom);
         $('#editClasse').val(eleve.classe);
         $('#editSexe').val(eleve.sexe);
-        $('#editDateNaissance').val(eleve.dateNaissance?.substring(0, 10));
+        $('#editDateNaissance').val(eleve.dateNaissance ? eleve.dateNaissance.substring(0,10) : '');
         $('#editLieuNaissance').val(eleve.lieuNaissance);
         $('#editAdresse').val(eleve.adresse);
         $('#editTelephone').val(eleve.telephone);
@@ -318,8 +356,8 @@ $(document).ready(function () {
         $('#editNompere').val(eleve.nompere);
         $('#editNomMere').val(eleve.nomMere);
         $('#editTypePaiement').val(eleve.typePaiement);
-        $('#editDateDebut').val(eleve.dateDebutPaiement?.substring(0, 10));
-        $('#editDateFin').val(eleve.dateFinPaiement?.substring(0, 10));
+        $('#editDateDebut').val(eleve.dateDebutPaiement ? eleve.dateDebutPaiement.substring(0,10) : '');
+        $('#editDateFin').val(eleve.dateFinPaiement ? eleve.dateFinPaiement.substring(0,10) : '');
         $('#editMontantPaiement').val(eleve.montantPaiement);
 
         new bootstrap.Modal(document.getElementById('editEleveModal')).show();
@@ -339,21 +377,25 @@ $(document).ready(function () {
       body: JSON.stringify(formData)
     })
     .then(res => res.json())
-    .then(() => {
-      bootstrap.Modal.getInstance(document.getElementById('editEleveModal')).hide();
-      loadEleves();
-      alert("Élève mis à jour !");
+    .then(data => {
+      if (data.eleve) {
+        bootstrap.Modal.getInstance(document.getElementById('editEleveModal')).hide();
+        loadEleves();
+        alert("Élève modifié !");
+      }
     });
   });
 
-  // Générer et afficher QR Code dans modal avec toutes les infos
-  $(document).on('click', '.qr-btn', function () {
+  // Afficher QR code dans modal
+  $(document).on('click', '.qr-btn', async function () {
     const id = $(this).data('id');
+    const res = await fetch(`http://localhost:5000/api/eleves/${id}`);
+    const eleve = await res.json();
 
-    fetch(`http://localhost:5000/api/eleves/${id}`)
-      .then(res => res.json())
-      .then(eleve => {
-        const qrData = `
+    const qrText = `
+Collège / Lycée privé l'Avenir Bizerte
+
+
 Matricule: ${eleve.matricule}
 Nom: ${eleve.nom}
 Prénom: ${eleve.prenom}
@@ -372,25 +414,20 @@ Date Fin Paiement: ${eleve.dateFinPaiement ? eleve.dateFinPaiement.substring(0, 
 Montant Paiement: ${eleve.montantPaiement} DT
 Payée: ${eleve.payee ? 'Oui' : 'Non'}
 Inscrit: ${eleve.inscrit ? 'Oui' : 'Non'}
-        `.trim();
+    `.trim();
 
-        $('#qrStudentName').text(`${eleve.nom} ${eleve.prenom}`);
+    $('#qrStudentName').text(`${eleve.nom} ${eleve.prenom}`);
+    $('#qrcodeCanvas').empty();
 
-        // Vider canvas précédent
-        $('#qrcodeCanvas').empty();
+    QRCode.toCanvas(document.createElement('canvas'), qrText, function (error, canvas) {
+      if (error) console.error(error);
+      $('#qrcodeCanvas').append(canvas);
+    });
 
-        QRCode.toCanvas(qrData, { errorCorrectionLevel: 'H' }, function (err, canvas) {
-          if (err) {
-            alert("Erreur génération QR Code");
-            return console.error(err);
-          }
-          $('#qrcodeCanvas').append(canvas);
-          new bootstrap.Modal(document.getElementById('qrCodeModal')).show();
-        });
-      });
+    new bootstrap.Modal(document.getElementById('qrCodeModal')).show();
   });
 
-  // Export PDF
+  // Export PDF avec logo et QR code
   $(document).on('click', '.export-pdf-btn', async function () {
     const id = $(this).data('id');
     try {
@@ -398,27 +435,14 @@ Inscrit: ${eleve.inscrit ? 'Oui' : 'Non'}
       if (!res.ok) throw new Error('Erreur lors de la récupération des données de l\'élève');
       const eleve = await res.json();
 
-      // Générer QR code sur canvas
       const qrCanvas = document.createElement('canvas');
       const qrText = `
-Matricule: ${eleve.matricule}
-Nom: ${eleve.nom}
-Prénom: ${eleve.prenom}
-Classe: ${eleve.classe}
-Sexe: ${eleve.sexe}
-Date Naissance: ${eleve.dateNaissance ? eleve.dateNaissance.substring(0, 10) : ''}
-Lieu Naissance: ${eleve.lieuNaissance}
-Adresse: ${eleve.adresse}
-Téléphone: ${eleve.telephone}
-Email: ${eleve.email}
-Nom Père: ${eleve.nompere}
-Nom Mère: ${eleve.nomMere}
-Type Paiement: ${eleve.typePaiement}
-Date Début Paiement: ${eleve.dateDebutPaiement ? eleve.dateDebutPaiement.substring(0, 10) : ''}
-Date Fin Paiement: ${eleve.dateFinPaiement ? eleve.dateFinPaiement.substring(0, 10) : ''}
-Montant Paiement: ${eleve.montantPaiement} DT
-Payée: ${eleve.payee ? 'Oui' : 'Non'}
-Inscrit: ${eleve.inscrit ? 'Oui' : 'Non'}
+Collège / Lycée privé l'Avenir Bizerte
+Téléphone : 70.032.952 / 93.906.726
+Adresse : rye Hassan Nouri Bizerte
+Facebook : https://www.facebook.com/collegeelmostakbel
+
+
       `.trim();
 
       await QRCode.toCanvas(qrCanvas, qrText);
@@ -428,7 +452,6 @@ Inscrit: ${eleve.inscrit ? 'Oui' : 'Non'}
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
 
-      // Chargement du logo en base64 (exemple : logo du blason tunisien)
       async function loadImageToBase64(url) {
         const response = await fetch(url);
         if (!response.ok) throw new Error('Erreur chargement logo');
@@ -440,15 +463,14 @@ Inscrit: ${eleve.inscrit ? 'Oui' : 'Non'}
           reader.readAsDataURL(blob);
         });
       }
-      const logoURL = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSs7M3B_Hgj_m2CsdB8ZV8zjX7RPDS3HSOhtA&s';
+
+      const logoURL = 'img/logolycee.png'; // Chemin vers logo
       const logoBase64 = await loadImageToBase64(logoURL);
 
-      // Ajout logo + titre
       doc.addImage(logoBase64, 'PNG', 10, 10, 25, 25);
       doc.setFontSize(16);
-      doc.text('Lycée Privé - Reçu de Paiement Élève', pageWidth / 2, 20, { align: 'center' });
+      doc.text('Collège / Lycée privé l\'Avenir Bizerte', pageWidth / 2, 20, { align: 'center' });
 
-      // Date export
       const dateExport = new Date().toLocaleDateString();
       doc.setFontSize(10);
       doc.text(`Date d'export : ${dateExport}`, pageWidth - 10, 18, { align: 'right' });
@@ -458,7 +480,6 @@ Inscrit: ${eleve.inscrit ? 'Oui' : 'Non'}
       doc.setLineWidth(0.5);
       doc.line(10, 45, pageWidth - 10, 45);
 
-      // Tableau infos
       const data = [
         ['Nom', eleve.nom],
         ['Prénom', eleve.prenom],
@@ -492,17 +513,14 @@ Inscrit: ${eleve.inscrit ? 'Oui' : 'Non'}
       const finalY = doc.lastAutoTable.finalY + 5;
       doc.line(10, finalY, pageWidth - 10, finalY);
 
-      // QR code dans le pied
       const qrSize = 50;
       const footerY = finalY + 10;
       doc.addImage(qrImgData, 'PNG', 10, footerY, qrSize, qrSize);
 
-      // Zone signature
       doc.setDrawColor(0);
       doc.rect(pageWidth - 70, footerY, 60, 30);
       doc.text('Signature', pageWidth - 40, footerY + 20, { align: 'center' });
 
-      // Tampon lycée
       doc.setFontSize(10);
       doc.text('Tampon Lycée', pageWidth - 70, footerY + 50);
 
@@ -514,6 +532,34 @@ Inscrit: ${eleve.inscrit ? 'Oui' : 'Non'}
   });
 
 });
+
+
+// Marquer l'élève comme payé
+
+
+
+// Bouton pour marquer comme payé
+$(document).on('click', '.mark-paid-btn', function () {
+  const id = $(this).data('id');
+  if (confirm("Marquer cet élève comme payé ?")) {
+    fetch(`http://localhost:5000/api/eleves/${id}/mark-paid`, { method: 'PUT' })
+      .then(res => res.json())
+      .then(data => {
+        alert("✅ Élève marqué comme payé !");
+        location.reload(); // Recharge toute la page
+      })
+      .catch(err => {
+        console.error(err);
+        alert("❌ Erreur lors de la mise à jour.");
+      });
+  }
+});
+
+
+
+
+
 </script>
+
 </body>
 </html>

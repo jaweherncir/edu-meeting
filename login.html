@@ -2,205 +2,179 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Glassmorphism Login</title>
-    <style>
-        :root {
-            --background: #1a1a2e;
-            --color: #ffffff;
-            --primary-color: #0f3460;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <style>
+    :root {
+      --background: #1a1a2e;
+      --color: #ffffff;
+      --primary-color: #0f3460;
+    }
 
-        * {
-            box-sizing: border-box;
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        html {
-            scroll-behavior: smooth;
-        }
+    body {
+      margin: 0;
+      font-family: "poppins";
+      background: var(--background);
+      color: var(--color);
+    }
 
-        body {
-            margin: 0;
-            box-sizing: border-box;
-            font-family: "poppins";
-            background: var(--background);
-            color: var(--color);
-            letter-spacing: 1px;
-            transition: background 0.2s ease;
-        }
+    h1 {
+      font-size: 2.5rem;
+    }
 
-        a {
-            text-decoration: none;
-            color: var(--color);
-        }
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
 
-        h1 {
-            font-size: 2.5rem;
-        }
+    .login-container {
+      position: relative;
+      width: 22.2rem;
+    }
 
-        .container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+    .form-container {
+      position: relative;
+      z-index: 1;
+      border: 1px solid hsla(0, 0%, 65%, 0.158);
+      box-shadow: 0 0 36px 1px rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      backdrop-filter: blur(20px);
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.05);
+    }
 
-        .login-container {
-            position: relative;
-            width: 22.2rem;
-        }
+    .login-container form input {
+      display: block;
+      padding: 14.5px;
+      width: 100%;
+      margin: 2rem 0;
+      color: var(--color);
+      background-color: #9191911f;
+      border: none;
+      border-radius: 5px;
+      font-size: 15px;
+    }
 
-        .form-container {
-            border: 1px solid hsla(0, 0%, 65%, 0.158);
-            box-shadow: 0 0 36px 1px rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            backdrop-filter: blur(20px);
-            padding: 2rem;
-        }
+    .login-container form button {
+      background-color: var(--primary-color);
+      color: var(--color);
+      display: block;
+      padding: 13px;
+      border-radius: 5px;
+      font-size: 18px;
+      font-weight: bold;
+      width: 100%;
+      cursor: pointer;
+      margin-bottom: 2rem;
+      border: none;
+    }
 
-        .login-container form input {
-            display: block;
-            padding: 14.5px;
-            width: 100%;
-            margin: 2rem 0;
-            color: var(--color);
-            outline: none;
-            background-color: #9191911f;
-            border: none;
-            border-radius: 5px;
-            font-weight: 500;
-            letter-spacing: 0.8px;
-            font-size: 15px;
-            backdrop-filter: blur(15px);
-        }
+    .circle {
+      width: 8rem;
+      height: 8rem;
+      background: var(--primary-color);
+      border-radius: 50%;
+      position: absolute;
+    }
 
-        .login-container form input:focus {
-            box-shadow: 0 0 16px 1px rgba(0, 0, 0, 0.2);
-            animation: wobble 0.3s ease-in;
-        }
+    .illustration {
+      position: absolute;
+      top: -14%;
+      right: -2px;
+      width: 90%;
+      z-index: -1;
+    }
 
-        .login-container form button {
-            background-color: var(--primary-color);
-            color: var(--color);
-            display: block;
-            padding: 13px;
-            border-radius: 5px;
-            outline: none;
-            font-size: 18px;
-            font-weight: bold;
-            width: 100%;
-            cursor: pointer;
-            margin-bottom: 2rem;
-            border: none;
-            transition: all 0.1s ease-in-out;
-        }
+    .circle-one {
+      top: 0;
+      left: 0;
+      z-index: -1;
+      transform: translate(-45%, -45%);
+    }
 
-        .login-container form button:hover {
-            box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.15);
-            transform: scale(1.02);
-        }
+    .circle-two {
+      bottom: 0;
+      right: 0;
+      z-index: -1;
+      transform: translate(45%, 45%);
+    }
 
-        .circle {
-            width: 8rem;
-            height: 8rem;
-            background: var(--primary-color);
-            border-radius: 50%;
-            position: absolute;
-        }
-
-        .illustration {
-            position: absolute;
-            top: -14%;
-            right: -2px;
-            width: 90%;
-        }
-
-        .circle-one {
-            top: 0;
-            left: 0;
-            z-index: -1;
-            transform: translate(-45%, -45%);
-        }
-
-        .circle-two {
-            bottom: 0;
-            right: 0;
-            z-index: -1;
-            transform: translate(45%, 45%);
-        }
-
-        .register-forget {
-            margin: 1rem 0;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .opacity {
-            opacity: 0.6;
-        }
-
-        .theme-btn-container {
-            position: absolute;
-            left: 0;
-            bottom: 2rem;
-        }
-
-        .theme-btn {
-            cursor: pointer;
-            transition: all 0.3s ease-in;
-        }
-
-        .theme-btn:hover {
-            width: 40px !important;
-        }
-
-        @keyframes wobble {
-            0% {
-                transform: scale(1.025);
-            }
-
-            25% {
-                transform: scale(1);
-            }
-
-            75% {
-                transform: scale(1.025);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
+    .register-forget {
+      margin: 1rem 0;
+      display: flex;
+      justify-content: space-between;
+    }
 
 
-     
-
-    </style>
+    .opacity {
+      opacity: 0.8;
+    }
+  </style>
 </head>
 
 <body>
-    <section class="container">
-        <div class="login-container">
-            <div class="circle circle-one"></div>
-            <div class="form-container">
-                <img src="https://raw.githubusercontent.com/hicodersofficial/glassmorphism-login-form/master/assets/illustration.png" alt="illustration" class="illustration" />
-                <h1 class="opacity">Se connecter</h1>
-                <form>
-                    <input type="email" placeholder="EMAIL" />
-                    <input type="password" placeholder="MOT DE PASSE " />
-                    <button class="opacity">valider</button>
-                </form>
-                <div class="register-forget opacity">
-                    <a href="inscription.html">S'inscrire</a>
-                 
-                </div>
-            </div>
-            <div class="circle circle-two"></div>
+  <section class="container">
+    <div class="login-container">
+      <div class="circle circle-one"></div>
+      <div class="form-container">
+        <img src="https://raw.githubusercontent.com/hicodersofficial/glassmorphism-login-form/master/assets/illustration.png"
+          alt="illustration" class="illustration" />
+        <h1 class="opacity">Se connecter</h1>
+        <form id="loginForm">
+          <input type="email" id="email" placeholder="EMAIL" required />
+          <input type="password" id="password" placeholder="MOT DE PASSE" required />
+          <button type="submit" class="opacity">Valider</button>
+        </form>
+     
+
+           <div class="register-forget opacity">
+          <a href="inscription.html">S'inscrire</a>
         </div>
-        <div class="theme-btn-container"></div>
-    </section>
+      </div>
+      <div class="circle circle-two"></div>
+    </div>
+  </section>
+
+  <script>
+    const form = document.getElementById("loginForm");
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const response = await fetch("http://localhost:5000/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: "include", // ✅ Required to save cookies from server
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert("Connexion réussie !");
+          window.location.href = "index.html"; // Redirect after login
+        } else {
+          alert("Erreur : " + (data.message || data.error));
+        }
+      } catch (error) {
+        alert("Erreur de connexion au serveur.");
+        console.error(error);
+      }
+    });
+  </script>
 </body>
 
 </html>
