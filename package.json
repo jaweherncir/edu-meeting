@@ -16,5 +16,8 @@
     "url": "https://github.com/jaweherncir/edu-meeting/issues"
   },
   "homepage": "https://github.com/jaweherncir/edu-meeting#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
 }
