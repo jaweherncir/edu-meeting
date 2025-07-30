@@ -1,0 +1,20 @@
+{
+  "name": "edu-meeting",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaweherncir/edu-meeting.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jaweherncir/edu-meeting/issues"
+  },
+  "homepage": "https://github.com/jaweherncir/edu-meeting#readme",
+  "description": ""
+}
