@@ -131,9 +131,9 @@
     async function loadPrixTotaux() {
       try {
         const [moisRes, semestreRes, anneeRes] = await Promise.all([
-          fetch('http://localhost:5000/api/eleves/somme/mois'),
-          fetch('http://localhost:5000/api/eleves/somme/semestre'),
-          fetch('http://localhost:5000/api/eleves/somme/annee')
+          fetch('https://backendamira.onrender.com/api/eleves/somme/mois'),
+          fetch('https://backendamira.onrender.com/api/eleves/somme/semestre'),
+          fetch('https://backendamira.onrender.com/api/eleves/somme/annee')
         ]);
 
         const moisData = await moisRes.json();

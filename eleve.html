@@ -228,7 +228,7 @@
 $(document).ready(function () {
   const table = $('#example').DataTable();
 function loadEleves() {
-  fetch('http://localhost:5000/api/eleves')
+  fetch('https://backendamira.onrender.com/api/eleves')
     .then(res => res.json())
     .then(data => {
       table.clear();
@@ -308,7 +308,7 @@ function loadEleves() {
     formData.payee = true;
     formData.inscrit = true;
 
-    fetch('http://localhost:5000/api/eleves', {
+    fetch('https://backendamira.onrender.com/api/eleves', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
@@ -328,7 +328,7 @@ function loadEleves() {
   $(document).on('click', '.delete-btn', function () {
     const id = $(this).data('id');
     if (confirm("Confirmer la suppression ?")) {
-      fetch(`http://localhost:5000/api/eleves/${id}`, { method: 'DELETE' })
+      fetch(`https://backendamira.onrender.com/api/eleves/${id}`, { method: 'DELETE' })
         .then(() => {
           alert("Élève supprimé !");
           loadEleves();
@@ -339,7 +339,7 @@ function loadEleves() {
   // Éditer élève
   $(document).on('click', '.edit-btn', function () {
     const id = $(this).data('id');
-    fetch(`http://localhost:5000/api/eleves/${id}`)
+    fetch(`https://backendamira.onrender.com/api/eleves/${id}`)
       .then(res => res.json())
       .then(eleve => {
         $('#editEleveId').val(eleve._id);
@@ -371,7 +371,7 @@ function loadEleves() {
     $(this).serializeArray().forEach(({ name, value }) => formData[name] = value);
     formData.montantPaiement = parseFloat(formData.montantPaiement);
 
-    fetch(`http://localhost:5000/api/eleves/${id}`, {
+    fetch(`https://backendamira.onrender.com/api/eleves/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
@@ -389,7 +389,7 @@ function loadEleves() {
   // Afficher QR code dans modal
   $(document).on('click', '.qr-btn', async function () {
     const id = $(this).data('id');
-    const res = await fetch(`http://localhost:5000/api/eleves/${id}`);
+    const res = await fetch(`https://backendamira.onrender.com/api/eleves/${id}`);
     const eleve = await res.json();
 
     const qrText = `
@@ -431,7 +431,7 @@ Inscrit: ${eleve.inscrit ? 'Oui' : 'Non'}
   $(document).on('click', '.export-pdf-btn', async function () {
     const id = $(this).data('id');
     try {
-      const res = await fetch(`http://localhost:5000/api/eleves/${id}`);
+      const res = await fetch(`https://backendamira.onrender.com/api/eleves/${id}`);
       if (!res.ok) throw new Error('Erreur lors de la récupération des données de l\'élève');
       const eleve = await res.json();
 
@@ -542,7 +542,7 @@ Facebook : https://www.facebook.com/collegeelmostakbel
 $(document).on('click', '.mark-paid-btn', function () {
   const id = $(this).data('id');
   if (confirm("Marquer cet élève comme payé ?")) {
-    fetch(`http://localhost:5000/api/eleves/${id}/mark-paid`, { method: 'PUT' })
+    fetch(`https://backendamira.onrender.com/api/eleves/${id}/mark-paid`, { method: 'PUT' })
       .then(res => res.json())
       .then(data => {
         alert("✅ Élève marqué comme payé !");
