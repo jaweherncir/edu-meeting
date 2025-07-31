@@ -162,7 +162,7 @@
   <script>
     async function fetchEleveStats() {
       try {
-        const response = await fetch("http://localhost:5000/api/eleves");
+        const response = await fetch("https://backendamira.onrender.com/api/eleves");
         const eleves = await response.json();
 
         const totalEleves = eleves.length;
